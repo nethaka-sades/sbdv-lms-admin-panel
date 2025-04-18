@@ -23,6 +23,7 @@ const formSchema = z.object({
   admin_no: z.string().min(1).optional(),
   phone_no: z.string().optional(),
   whatsapp_no: z.string().optional(),
+  address: z.string().optional(),
   created_at: z.string().optional(),
   verified: z.boolean().default(false).optional(),
   deletion_req: z.boolean().default(false).optional(),
@@ -54,7 +55,7 @@ export default function MyForm({ onSubmit, initialData }: MyFormProps) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="space-y-4 py-3"
+        className="space-y-2 py-3"
       >
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-6">
@@ -161,6 +162,25 @@ export default function MyForm({ onSubmit, initialData }: MyFormProps) {
             />
           </div>
         </div>
+
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Address</FormLabel>
+              <FormControl>
+                <Input 
+                placeholder=""
+                
+                type="text"
+                {...field} />
+              </FormControl>
+              
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-6">

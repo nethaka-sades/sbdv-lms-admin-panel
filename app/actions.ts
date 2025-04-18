@@ -122,7 +122,7 @@ export type UserProfile = {
   id: string;
   created_at: string;
   full_name: string;
-  cached_email: string;
+  user_email: string;
   admin_no: string;
   admin_year: string;
   address: string,
@@ -149,7 +149,7 @@ export const getVerifiedProfiles = async (): Promise<{
         admin_no,
         admin_year,
         created_at,
-        cached_email,
+        user_email,
         verified,
         address,
         phone_no,
@@ -166,7 +166,7 @@ export const getVerifiedProfiles = async (): Promise<{
 
     const profilesWithEmails = profiles.map(profile => ({
       ...profile,
-      email: profile.cached_email || 'No email',
+      email: profile.user_email || 'No email',
       created_at: new Date(profile.created_at).toLocaleDateString('en-US', {
         year: 'numeric',
         month: '2-digit',
@@ -227,7 +227,7 @@ export const getUsersProfiles = async (): Promise<{
         admin_no,
         admin_year,
         created_at,
-        cached_email,
+        user_email,
         verified,
         address,
         phone_no,
@@ -243,7 +243,7 @@ export const getUsersProfiles = async (): Promise<{
 
     const profilesWithEmails = profiles.map(profile => ({
       ...profile,
-      email: profile.cached_email || 'No email',
+      email: profile.user_email || 'No email',
       created_at: new Date(profile.created_at).toLocaleDateString('en-US', {
         year: 'numeric',
         month: '2-digit',
@@ -273,6 +273,84 @@ export const getUsersProfiles = async (): Promise<{
 };
 
 export const updateUserData = async (updatedUser: UserProfile) => {
+  try {
+    const supabase = await createClient();
+    const { data: updatedData, error } = await supabase
+      .from('profiles')
+      .update({ ...updatedUser, created_at: new Date(updatedUser.created_at), deletion_req_date: new Date(updatedUser.deletion_req_date) })
+      .eq('id', updatedUser.id)
+      .select();
+
+    if (error) throw error;
+    return updatedData;
+  } catch (err) {
+    console.error('Error updating profile:', err);
+    return err;
+  }
+};
+
+// Deletion Requests
+export const getDRProfiles = async (): Promise<{
+  data: UserProfile[];
+  error: Error | null;
+}> => {
+  const supabase = await createClient();
+  try {
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select(`
+        id,
+        full_name,
+        admin_no,
+        admin_year,
+        created_at,
+        user_email,
+        verified,
+        address,
+        phone_no,
+        whatsapp_no,
+        deletion_req,
+        deletion_req_date,
+        deletion_confirmed
+      `)
+      .eq('deletion_req', true)
+      .order('deletion_req_date', { ascending: false });
+
+    if (profilesError) throw profilesError;
+    if (!profiles) return { data: [], error: null };
+
+    const profilesWithEmails = profiles.map(profile => ({
+      ...profile,
+      email: profile.user_email || 'No email',
+      created_at: new Date(profile.created_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }),
+      deletion_req_date: new Date(profile.deletion_req_date || "").toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }),
+    }));
+
+    return { data: profilesWithEmails, error: null };
+  } catch (error) {
+    console.error('Error fetching user profiles:', error);
+    return {
+      data: [],
+      error: error instanceof Error ? error : new Error('Unknown error')
+    };
+  }
+};
+
+export const updateDRData = async (updatedUser: UserProfile) => {
   try {
     const supabase = await createClient();
     const { data: updatedData, error } = await supabase
