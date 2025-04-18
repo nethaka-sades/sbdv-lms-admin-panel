@@ -11,7 +11,7 @@ import {
 import { createNColumns } from "@/components/nTab/n-columns";
 import { NTable } from "@/components/nTab/n-table";
 
-import { getNotices, updateDRData } from "@/app/actions";
+import { updateDRData } from "@/app/actions";
 import { UserProfile } from "@/app/actions";
 import MyForm from "./n-form";
 
@@ -22,6 +22,7 @@ export default function NTab() {
   const nColumns = createNColumns();
 
   // Fetch data on component mount
+  {/*
   useEffect(() => {
     const fetchData = async () => {
       const { data, error } = await getNotices();
@@ -34,6 +35,7 @@ export default function NTab() {
 
     fetchData();
   }, []);
+  */}
 
   const handleUpdate = async (updatedUser: UserProfile) => {
     try {
